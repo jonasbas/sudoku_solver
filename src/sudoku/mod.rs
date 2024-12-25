@@ -1,8 +1,10 @@
+pub mod parse;
+
 use std::{collections::HashSet, fmt::Display};
 
 #[derive(Debug, Default)]
-pub struct DataRow {
-    pub values: [u8; 9],
+struct DataRow {
+    values: [u8; 9],
 }
 
 impl DataRow {
