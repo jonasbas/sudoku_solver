@@ -2,7 +2,7 @@ pub mod parse;
 
 use std::{collections::HashSet, fmt::Display};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Copy)]
 struct DataRow {
     values: [u8; 9],
 }
@@ -39,20 +39,20 @@ impl Display for DataRow {
 }
 
 /*
-  0 1 2   3 4 5   6 7 8
-0 x x x | x x x | x x x
-1 x x x | x x x | x x x
-2 x x x | x x x | x x x
-  ------+-------+------
-3 x x x | x x x | x x x
-4 x x x | x x x | x x x
-5 x x x | x x x | x x x
-  ------+-------+------
-6 x x x | x x x | x x x
-7 x x x | x x x | x x x
-8 x x x | x x x | x x x
+  0 1 2   3 4 5   6 7 8       box indices
+0 x x x | x x x | x x x  x x x | x x x | x x x
+1 x x x | x x x | x x x  x 0 x | x 1 x | x 2 x
+2 x x x | x x x | x x x  x x x | x x x | x x x
+  ------+-------+------  ------+-------+------
+3 x x x | x x x | x x x  x x x | x x x | x x x
+4 x x x | x x x | x x x  x 3 x | x 4 x | x 5 x
+5 x x x | x x x | x x x  x x x | x x x | x x x
+  ------+-------+------  ------+-------+------
+6 x x x | x x x | x x x  x x x | x x x | x x x
+7 x x x | x x x | x x x  x 6 x | x 7 x | x 8 x
+8 x x x | x x x | x x x  x x x | x x x | x x x
 */
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Sudoku {
     pub values: [[u8; 9]; 9],
 }
@@ -78,6 +78,119 @@ impl Sudoku {
         ];
 
         Some(DataRow { values: column })
+    }
+
+    fn get_box(&self, idx: usize) -> Option<DataRow> {
+        if idx >= 9 {
+            return None;
+        }
+
+        let values = self.values;
+
+        let data = match idx {
+            0 => Some([
+                values[0][0],
+                values[0][1],
+                values[0][2],
+                values[1][0],
+                values[1][1],
+                values[1][2],
+                values[2][0],
+                values[2][1],
+                values[2][2],
+            ]),
+            1 => Some([
+                values[0][3],
+                values[0][4],
+                values[0][5],
+                values[1][3],
+                values[1][4],
+                values[1][5],
+                values[2][3],
+                values[2][4],
+                values[2][5],
+            ]),
+            2 => Some([
+                values[0][6],
+                values[0][7],
+                values[0][8],
+                values[1][6],
+                values[1][7],
+                values[1][8],
+                values[2][6],
+                values[2][7],
+                values[2][8],
+            ]),
+            3 => Some([
+                values[3][0],
+                values[3][1],
+                values[3][2],
+                values[4][0],
+                values[4][1],
+                values[4][2],
+                values[5][0],
+                values[5][1],
+                values[5][2],
+            ]),
+            4 => Some([
+                values[3][3],
+                values[3][4],
+                values[3][5],
+                values[4][3],
+                values[4][4],
+                values[4][5],
+                values[5][3],
+                values[5][4],
+                values[5][5],
+            ]),
+            5 => Some([
+                values[3][6],
+                values[3][7],
+                values[3][8],
+                values[4][6],
+                values[4][7],
+                values[4][8],
+                values[5][6],
+                values[5][7],
+                values[5][8],
+            ]),
+            6 => Some([
+                values[6][0],
+                values[6][1],
+                values[6][2],
+                values[7][0],
+                values[7][1],
+                values[7][2],
+                values[8][0],
+                values[8][1],
+                values[8][2],
+            ]),
+            7 => Some([
+                values[6][3],
+                values[6][4],
+                values[6][5],
+                values[7][3],
+                values[7][4],
+                values[7][5],
+                values[8][3],
+                values[8][4],
+                values[8][5],
+            ]),
+            8 => Some([
+                values[6][6],
+                values[6][7],
+                values[6][8],
+                values[7][6],
+                values[7][7],
+                values[7][8],
+                values[8][6],
+                values[8][7],
+                values[8][8],
+            ]),
+            _ => None,
+        };
+
+        data.map(|x| DataRow { values: x })
     }
 }
 
@@ -121,5 +234,34 @@ mod test {
             !row.is_valid(),
             "Should be invalid due to empty/zero values."
         );
+    }
+
+    #[test]
+    fn test_get_box() {
+        let test_sudoku = Sudoku {
+            values: [
+                [2, 0, 0, 1, 0, 5, 0, 0, 3],
+                [0, 5, 4, 0, 0, 0, 7, 1, 0],
+                [0, 1, 0, 2, 0, 3, 0, 8, 0],
+                [6, 0, 2, 8, 0, 7, 3, 0, 4],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 5, 3, 0, 9, 8, 0, 6],
+                [0, 2, 0, 7, 0, 1, 0, 6, 0],
+                [0, 8, 1, 0, 0, 0, 2, 4, 0],
+                [7, 0, 0, 4, 0, 2, 0, 0, 1],
+            ],
+        };
+
+        let expected = [2, 0, 0, 0, 5, 4, 0, 1, 0];
+
+        assert_eq!(expected, test_sudoku.get_box(0).unwrap().values);
+
+        let expected = [8, 0, 7, 0, 0, 0, 3, 0, 9];
+
+        assert_eq!(expected, test_sudoku.get_box(4).unwrap().values);
+
+        let expected = [0, 6, 0, 2, 4, 0, 0, 0, 1];
+
+        assert_eq!(expected, test_sudoku.get_box(8).unwrap().values);
     }
 }
