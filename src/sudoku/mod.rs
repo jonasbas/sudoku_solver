@@ -9,14 +9,12 @@ struct DataRow {
 
 impl DataRow {
     fn is_valid(&self) -> bool {
-        let any_zero = self.values.iter().any(|x| *x == 0);
+        let values_without_zero = self.values.iter().filter(|x| **x != 0).collect::<Vec<_>>();
 
-        if any_zero {
-            return false;
-        }
+        let expected_length = values_without_zero.len();
 
-        let distinct_length = self.values.iter().collect::<HashSet<_>>().len();
-        9 == distinct_length
+        let distinct_length = values_without_zero.iter().collect::<HashSet<_>>().len();
+        expected_length == distinct_length
     }
 }
 
@@ -58,6 +56,26 @@ pub struct Sudoku {
 }
 
 impl Sudoku {
+    pub fn is_valid(&self) -> bool {
+        for idx in 0..9 {
+            let row = self.get_row(idx).expect("Sudoku row malformed.");
+            let column = self.get_column(idx).expect("Sudoku column malformed.");
+            let s_box = self.get_box(idx).expect("Sudoku box is malformed");
+
+            if !row.is_valid() {
+                return false;
+            }
+            if !column.is_valid() {
+                return false;
+            }
+            if !s_box.is_valid() {
+                return false;
+            }
+        }
+
+        true
+    }
+
     fn get_row(&self, idx: usize) -> Option<DataRow> {
         if idx >= 9 {
             return None;
@@ -225,15 +243,6 @@ mod test {
             values: [3, 3, 2, 1, 8, 7, 9, 6, 5],
         };
         assert!(!row.is_valid(), "Should be invalid due to duplicates.");
-
-        // row has empty/ zero values
-        let row = DataRow {
-            values: [3, 4, 2, 1, 8, 7, 9, 0, 5],
-        };
-        assert!(
-            !row.is_valid(),
-            "Should be invalid due to empty/zero values."
-        );
     }
 
     #[test]
