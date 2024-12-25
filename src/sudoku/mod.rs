@@ -1,8 +1,4 @@
-use std::{
-    collections::HashSet,
-    fmt::{Display, Write},
-    usize,
-};
+use std::{collections::HashSet, fmt::Display};
 
 #[derive(Debug, Default)]
 pub struct DataRow {
@@ -94,5 +90,34 @@ impl Display for Sudoku {
             row.fmt(f)?;
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_valid_row() {
+        // row is valid
+        let row = DataRow {
+            values: [3, 4, 2, 1, 8, 7, 9, 6, 5],
+        };
+        assert!(row.is_valid(), "Should be valid row.");
+
+        // row has duplicates
+        let row = DataRow {
+            values: [3, 3, 2, 1, 8, 7, 9, 6, 5],
+        };
+        assert!(!row.is_valid(), "Should be invalid due to duplicates.");
+
+        // row has empty/ zero values
+        let row = DataRow {
+            values: [3, 4, 2, 1, 8, 7, 9, 0, 5],
+        };
+        assert!(
+            !row.is_valid(),
+            "Should be invalid due to empty/zero values."
+        );
     }
 }
