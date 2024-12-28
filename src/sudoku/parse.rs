@@ -118,7 +118,7 @@ mod test {
 
     #[test]
     fn test_sdk() {
-        let file_path = Path::new("src/sudoku/test_sudoku.sdk");
+        let file_path = Path::new("sudoku_files/test_sudoku.sdk");
 
         let expected = [
             [2, 0, 0, 1, 0, 5, 0, 0, 3],
@@ -139,7 +139,7 @@ mod test {
 
     #[test]
     fn test_smd() {
-        let file_path = Path::new("src/sudoku/test_sudoku.smd");
+        let file_path = Path::new("sudoku_files/test_sudoku.smd");
 
         let expected = [
             [0, 0, 0, 4, 0, 0, 0, 9, 8],

@@ -2,40 +2,6 @@ pub mod parse;
 
 use std::{collections::HashSet, fmt::Display};
 
-#[derive(Debug, Default, Clone, Copy)]
-struct DataRow {
-    values: [u8; 9],
-}
-
-impl DataRow {
-    fn is_valid(&self) -> bool {
-        let values_without_zero = self.values.iter().filter(|x| **x != 0).collect::<Vec<_>>();
-
-        let expected_length = values_without_zero.len();
-
-        let distinct_length = values_without_zero.iter().collect::<HashSet<_>>().len();
-        expected_length == distinct_length
-    }
-}
-
-impl Display for DataRow {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(
-            f,
-            "{} {} {} | {} {} {} | {} {} {}",
-            self.values[0],
-            self.values[1],
-            self.values[2],
-            self.values[3],
-            self.values[4],
-            self.values[5],
-            self.values[6],
-            self.values[7],
-            self.values[8],
-        )
-    }
-}
-
 /*
   0 1 2   3 4 5   6 7 8       box indices
 0 x x x | x x x | x x x  x x x | x x x | x x x
@@ -130,120 +96,78 @@ impl Sudoku {
     }
 
     fn get_box(&self, idx: usize) -> Option<DataRow> {
-        if idx >= 9 {
-            return None;
-        }
-
         let values = self.values;
 
-        // can we do better?
-        let data = match idx {
-            0 => Some([
-                values[0][0],
-                values[0][1],
-                values[0][2],
-                values[1][0],
-                values[1][1],
-                values[1][2],
-                values[2][0],
-                values[2][1],
-                values[2][2],
-            ]),
-            1 => Some([
-                values[0][3],
-                values[0][4],
-                values[0][5],
-                values[1][3],
-                values[1][4],
-                values[1][5],
-                values[2][3],
-                values[2][4],
-                values[2][5],
-            ]),
-            2 => Some([
-                values[0][6],
-                values[0][7],
-                values[0][8],
-                values[1][6],
-                values[1][7],
-                values[1][8],
-                values[2][6],
-                values[2][7],
-                values[2][8],
-            ]),
-            3 => Some([
-                values[3][0],
-                values[3][1],
-                values[3][2],
-                values[4][0],
-                values[4][1],
-                values[4][2],
-                values[5][0],
-                values[5][1],
-                values[5][2],
-            ]),
-            4 => Some([
-                values[3][3],
-                values[3][4],
-                values[3][5],
-                values[4][3],
-                values[4][4],
-                values[4][5],
-                values[5][3],
-                values[5][4],
-                values[5][5],
-            ]),
-            5 => Some([
-                values[3][6],
-                values[3][7],
-                values[3][8],
-                values[4][6],
-                values[4][7],
-                values[4][8],
-                values[5][6],
-                values[5][7],
-                values[5][8],
-            ]),
-            6 => Some([
-                values[6][0],
-                values[6][1],
-                values[6][2],
-                values[7][0],
-                values[7][1],
-                values[7][2],
-                values[8][0],
-                values[8][1],
-                values[8][2],
-            ]),
-            7 => Some([
-                values[6][3],
-                values[6][4],
-                values[6][5],
-                values[7][3],
-                values[7][4],
-                values[7][5],
-                values[8][3],
-                values[8][4],
-                values[8][5],
-            ]),
-            8 => Some([
-                values[6][6],
-                values[6][7],
-                values[6][8],
-                values[7][6],
-                values[7][7],
-                values[7][8],
-                values[8][6],
-                values[8][7],
-                values[8][8],
-            ]),
-            _ => None,
+        let offset = match idx {
+            0 => (0, 0),
+            1 => (0, 3),
+            2 => (0, 6),
+            3 => (3, 0),
+            4 => (3, 3),
+            5 => (3, 6),
+            6 => (6, 0),
+            7 => (6, 3),
+            8 => (6, 6),
+            _ => return None,
         };
 
-        data.map(|x| DataRow { values: x })
+        let box_indices = [
+            (0, 0),
+            (0, 1),
+            (0, 2),
+            (1, 0),
+            (1, 1),
+            (1, 2),
+            (2, 0),
+            (2, 1),
+            (2, 2),
+        ];
+
+        let data = box_indices.map(|(x, y)| {
+            let x = x + offset.1;
+            let y = y + offset.1;
+
+            values[x][y]
+        });
+
+        Some(DataRow { values: data })
     }
 }
 
+#[derive(Debug, Default, Clone, Copy)]
+struct DataRow {
+    values: [u8; 9],
+}
+
+impl DataRow {
+    fn is_valid(&self) -> bool {
+        let values_without_zero = self.values.iter().filter(|x| **x != 0).collect::<Vec<_>>();
+
+        let expected_length = values_without_zero.len();
+
+        let distinct_length = values_without_zero.iter().collect::<HashSet<_>>().len();
+        expected_length == distinct_length
+    }
+}
+
+// display implementations
+impl Display for DataRow {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(
+            f,
+            "{} {} {} | {} {} {} | {} {} {}",
+            self.values[0],
+            self.values[1],
+            self.values[2],
+            self.values[3],
+            self.values[4],
+            self.values[5],
+            self.values[6],
+            self.values[7],
+            self.values[8],
+        )
+    }
+}
 impl Display for Sudoku {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for idx in 0..9 {

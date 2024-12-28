@@ -1,15 +1,14 @@
 use sudoku::parse::parse_sudoku;
 
-mod backtracking;
+mod solve;
 mod sudoku;
-
 fn main() {
-    let sudoku = parse_sudoku("src/sudoku/test_sudoku.sdk").unwrap();
+    let sudoku = parse_sudoku("sudoku_files/test_sudoku.sdk").unwrap();
 
     println!("Input:");
     println!("{}", sudoku);
 
-    let solved = backtracking::solve(&sudoku).expect("No Solution found");
+    let solved = solve::backtracking(&sudoku).expect("No Solution found");
 
     println!("Result:");
     println!("{}", solved);
