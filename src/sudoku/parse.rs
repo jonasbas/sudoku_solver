@@ -2,8 +2,32 @@ use std::{fs, io::Error, path::Path};
 
 use super::Sudoku;
 
-pub fn sdk(path: &str) -> Result<Sudoku, Error> {
+pub fn parse_sudoku(path: &str) -> Result<Sudoku, Error> {
     let path = Path::new(path);
+    let extension = path.extension();
+
+    if extension.is_none() {
+        return Err(Error::new(
+            std::io::ErrorKind::Unsupported,
+            "file path is malformed or has no supported file extension.",
+        ));
+    }
+
+    let extension = extension.unwrap();
+
+    let result = match extension.to_str() {
+        Some("sdk") => sdk(path),
+        Some("smd") => smd(path),
+        _ => Err(Error::new(
+            std::io::ErrorKind::Unsupported,
+            "extension type is not supported.",
+        )),
+    };
+
+    result
+}
+
+fn sdk(path: &Path) -> Result<Sudoku, Error> {
     let file_data = fs::read_to_string(path).expect("File not found.");
 
     // For now ignore meta data
@@ -30,8 +54,7 @@ pub fn sdk(path: &str) -> Result<Sudoku, Error> {
 }
 
 // currently supports only one puzzle should support multiple in the future
-pub fn smd(path: &str) -> Result<Sudoku, Error> {
-    let path = Path::new(path);
+fn smd(path: &Path) -> Result<Sudoku, Error> {
     let file_data = fs::read_to_string(path).expect("File not found.");
 
     let mut data: [[u8; 9]; 9] = [[0; 9]; 9];
@@ -95,7 +118,7 @@ mod test {
 
     #[test]
     fn test_sdk() {
-        let file_path = "src/sudoku/test_sudoku.sdk";
+        let file_path = Path::new("src/sudoku/test_sudoku.sdk");
 
         let expected = [
             [2, 0, 0, 1, 0, 5, 0, 0, 3],
@@ -109,14 +132,14 @@ mod test {
             [7, 0, 0, 4, 0, 2, 0, 0, 1],
         ];
 
-        let parsed = sdk(&file_path).unwrap();
+        let parsed = sdk(file_path).unwrap();
 
         assert_eq!(expected, parsed.values);
     }
 
     #[test]
     fn test_smd() {
-        let file_path = "src/sudoku/test_sudoku.smd";
+        let file_path = Path::new("src/sudoku/test_sudoku.smd");
 
         let expected = [
             [0, 0, 0, 4, 0, 0, 0, 9, 8],
@@ -130,7 +153,7 @@ mod test {
             [0, 0, 8, 9, 0, 0, 6, 0, 0],
         ];
 
-        let parsed = smd(&file_path).unwrap();
+        let parsed = smd(file_path).unwrap();
 
         assert_eq!(expected, parsed.values);
     }
