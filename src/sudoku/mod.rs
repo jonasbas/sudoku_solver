@@ -124,7 +124,7 @@ impl Sudoku {
         ];
 
         let data = box_indices.map(|(x, y)| {
-            let x = x + offset.1;
+            let x = x + offset.0;
             let y = y + offset.1;
 
             values[x][y]

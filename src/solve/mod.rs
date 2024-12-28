@@ -33,3 +33,21 @@ pub fn backtracking(sudoku_to_solve: &Sudoku) -> Option<Sudoku> {
 
     None
 }
+
+#[cfg(test)]
+mod test {
+    use crate::sudoku::parse::parse_sudoku;
+
+    use super::*;
+
+    #[test]
+    fn test_backtrack() {
+        let sudoku = parse_sudoku("sudoku_files/parse_test.smd").unwrap();
+        let solved = backtracking(&sudoku).unwrap();
+
+        let expected = parse_sudoku("sudoku_files/parse_test_expected.smd").unwrap();
+
+        assert!(solved.is_valid());
+        assert_eq!(expected.values, solved.values);
+    }
+}
