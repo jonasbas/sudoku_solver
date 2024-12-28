@@ -15,7 +15,7 @@ pub fn sdk(path: &str) -> Result<Sudoku, Error> {
             let data: Vec<u8> = line
                 .chars()
                 .map(|c| {
-                    if c.is_digit(10) {
+                    if c.is_ascii_digit() {
                         c.to_digit(10).expect(".sdk file is malformed") as u8
                     } else {
                         0
@@ -30,20 +30,12 @@ pub fn sdk(path: &str) -> Result<Sudoku, Error> {
     from_vec(&data)
 }
 
-fn from_vec(data: &Vec<Vec<u8>>) -> Result<Sudoku, Error> {
+fn from_vec(data: &[Vec<u8>]) -> Result<Sudoku, Error> {
     let rows: Vec<[u8; 9]> = data
         .iter()
         .map(|row| {
             [
-                row[0] as u8,
-                row[1] as u8,
-                row[2] as u8,
-                row[3] as u8,
-                row[4] as u8,
-                row[5] as u8,
-                row[6] as u8,
-                row[7] as u8,
-                row[8] as u8,
+                row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8],
             ]
         })
         .collect();

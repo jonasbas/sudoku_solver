@@ -55,6 +55,7 @@ pub struct Sudoku {
     pub values: [[u8; 9]; 9],
 }
 
+// public methods
 impl Sudoku {
     pub fn is_valid(&self) -> bool {
         for idx in 0..9 {
@@ -75,7 +76,23 @@ impl Sudoku {
 
         true
     }
+    pub fn next_empty_cell(&self) -> Option<(usize, usize)> {
+        let values = self.values;
 
+        for (i, row) in values.iter().enumerate() {
+            for (j, value) in row.iter().enumerate() {
+                if *value == 0 {
+                    return Some((i, j));
+                }
+            }
+        }
+
+        None
+    }
+}
+
+// private methods
+impl Sudoku {
     fn get_row(&self, idx: usize) -> Option<DataRow> {
         if idx >= 9 {
             return None;
@@ -105,6 +122,7 @@ impl Sudoku {
 
         let values = self.values;
 
+        // can we do better
         let data = match idx {
             0 => Some([
                 values[0][0],
@@ -262,15 +280,47 @@ mod test {
         };
 
         let expected = [2, 0, 0, 0, 5, 4, 0, 1, 0];
-
         assert_eq!(expected, test_sudoku.get_box(0).unwrap().values);
 
         let expected = [8, 0, 7, 0, 0, 0, 3, 0, 9];
-
         assert_eq!(expected, test_sudoku.get_box(4).unwrap().values);
 
         let expected = [0, 6, 0, 2, 4, 0, 0, 0, 1];
-
         assert_eq!(expected, test_sudoku.get_box(8).unwrap().values);
+    }
+
+    #[test]
+    fn test_next_empty_cell() {
+        let test_sudoku = Sudoku {
+            values: [
+                [2, 0, 0, 1, 0, 5, 0, 0, 3],
+                [0, 5, 4, 0, 0, 0, 7, 1, 0],
+                [0, 1, 0, 2, 0, 3, 0, 8, 0],
+                [6, 0, 2, 8, 0, 7, 3, 0, 4],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 5, 3, 0, 9, 8, 0, 6],
+                [0, 2, 0, 7, 0, 1, 0, 6, 0],
+                [0, 8, 1, 0, 0, 0, 2, 4, 0],
+                [7, 0, 0, 4, 0, 2, 0, 0, 1],
+            ],
+        };
+
+        assert_eq!((0, 1), test_sudoku.next_empty_cell().unwrap());
+
+        let test_sudoku = Sudoku {
+            values: [
+                [2, 3, 6, 1, 4, 5, 9, 7, 3],
+                [0, 5, 4, 0, 0, 0, 7, 1, 0],
+                [0, 1, 0, 2, 0, 3, 0, 8, 0],
+                [6, 0, 2, 8, 0, 7, 3, 0, 4],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 5, 3, 0, 9, 8, 0, 6],
+                [0, 2, 0, 7, 0, 1, 0, 6, 0],
+                [0, 8, 1, 0, 0, 0, 2, 4, 0],
+                [7, 0, 0, 4, 0, 2, 0, 0, 1],
+            ],
+        };
+
+        assert_eq!((1, 0), test_sudoku.next_empty_cell().unwrap());
     }
 }
