@@ -1,10 +1,10 @@
-use sudoku::parse::sdk;
+use sudoku::parse::{sdk, smd};
 
 mod backtracking;
 mod sudoku;
 
 fn main() {
-    let sudoku = sdk("src/sudoku/test_sudoku.sdk").unwrap();
+    let sudoku = smd("src/sudoku/test_sudoku.smd").unwrap();
 
     println!("Input:");
     println!("{}", sudoku);

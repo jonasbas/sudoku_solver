@@ -4,7 +4,6 @@ use super::Sudoku;
 
 pub fn sdk(path: &str) -> Result<Sudoku, Error> {
     let path = Path::new(path);
-
     let file_data = fs::read_to_string(path).expect("File not found.");
 
     // For now ignore meta data
@@ -28,6 +27,26 @@ pub fn sdk(path: &str) -> Result<Sudoku, Error> {
         .collect();
 
     from_vec(&data)
+}
+
+// currently supports only one puzzle should support multiple in the future
+pub fn smd(path: &str) -> Result<Sudoku, Error> {
+    let path = Path::new(path);
+    let file_data = fs::read_to_string(path).expect("File not found.");
+
+    let mut data: [[u8; 9]; 9] = [[0; 9]; 9];
+    for (idx, c) in file_data.chars().enumerate() {
+        if idx > 80 {
+            break;
+        }
+
+        let row = idx / 9;
+        let column = idx % 9;
+
+        data[row][column] = c.to_digit(10).expect("sudoku file is malformed") as u8;
+    }
+
+    Ok(Sudoku { values: data })
 }
 
 fn from_vec(data: &[Vec<u8>]) -> Result<Sudoku, Error> {
@@ -91,6 +110,27 @@ mod test {
         ];
 
         let parsed = sdk(&file_path).unwrap();
+
+        assert_eq!(expected, parsed.values);
+    }
+
+    #[test]
+    fn test_smd() {
+        let file_path = "src/sudoku/test_sudoku.smd";
+
+        let expected = [
+            [0, 0, 0, 4, 0, 0, 0, 9, 8],
+            [0, 0, 0, 5, 0, 9, 0, 1, 2],
+            [0, 0, 0, 0, 3, 0, 0, 0, 0],
+            [8, 0, 9, 0, 0, 4, 5, 0, 0],
+            [0, 5, 2, 1, 8, 0, 0, 4, 0],
+            [0, 0, 0, 0, 0, 0, 0, 3, 0],
+            [9, 6, 0, 8, 0, 0, 0, 0, 0],
+            [4, 0, 0, 0, 2, 0, 0, 0, 0],
+            [0, 0, 8, 9, 0, 0, 6, 0, 0],
+        ];
+
+        let parsed = smd(&file_path).unwrap();
 
         assert_eq!(expected, parsed.values);
     }
